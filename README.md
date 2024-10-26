@@ -1,0 +1,1 @@
+A custom holdable tablet that allows you to change the colours of your platforms! Press [GRIP] next to the handle of the tablet to grab it, and then press [GRIP] on your controllers to summon a platform!
