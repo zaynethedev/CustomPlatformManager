@@ -4,7 +4,6 @@ using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using CustomPlatformManager.buttons;
-using DevHoldableEngine;
 using TMPro;
 using UnityEngine;
 using Utilla;
@@ -13,7 +12,7 @@ namespace CustomPlatformManager
 {
     [ModdedGamemode]
     [BepInDependency("org.legoandmars.gorillatag.utilla", "1.5.0")]
-    [BepInPlugin("zaynethedev.CustomPlatformManager", "CustomPlatformManager", "1.0.0")]
+    [BepInPlugin("zaynethedev.CustomPlatformManager", "CustomPlatformManager", "1.0.1")]
     public class Plugin : BaseUnityPlugin
     {
         public bool isFlip = false;
@@ -67,17 +66,12 @@ namespace CustomPlatformManager
 
             manager.SetActive(true);
             manager.name = "CPM";
+            Transform CPMT = manager.transform;
 
-            var handle = manager.transform.Find("Handle");
-            if (handle == null)
-                return;
-
-            handle.gameObject.AddComponent<DevHoldable>();
-
-            infoText = handle.Find("Main/TextObjects/Other/Version")?.GetComponent<TextMeshPro>();
-            redText = handle.Find("Main/TextObjects/Colors/Red/Value")?.GetComponent<TextMeshPro>();
-            greenText = handle.Find("Main/TextObjects/Colors/Green/Value")?.GetComponent<TextMeshPro>();
-            blueText = handle.Find("Main/TextObjects/Colors/Blue/Value")?.GetComponent<TextMeshPro>();
+            infoText = CPMT.Find("Main/TextObjects/Other/Version")?.GetComponent<TextMeshPro>();
+            redText = CPMT.Find("Main/TextObjects/Colors/Red/Value")?.GetComponent<TextMeshPro>();
+            greenText = CPMT.Find("Main/TextObjects/Colors/Green/Value")?.GetComponent<TextMeshPro>();
+            blueText = CPMT.Find("Main/TextObjects/Colors/Blue/Value")?.GetComponent<TextMeshPro>();
 
             redText.text = "RED: 0";
             greenText.text = "GREEN: 0";
@@ -86,10 +80,10 @@ namespace CustomPlatformManager
             platformColorG = greenText.text.ToString();
             platformColorB = blueText.text.ToString();
 
-            manager.transform.localPosition = new Vector3(-65.5614f, 11.8f, -81.3375f);
-            manager.transform.localScale = new Vector3(0.15f, 0.15f, 0.15f);
-            manager.transform.rotation = Quaternion.Euler(0f, 306f, 0);
-            infoText.text = "v1.0.0";
+            manager.transform.localPosition = new Vector3(-69.25f, 12f, -83.87f);
+            manager.transform.localScale = new Vector3(0.16f, 0.16f, 0.16f);
+            manager.transform.rotation = Quaternion.Euler(0f, 335f, 0f);
+            infoText.text = "v1.0.1";
 
             platformL = GameObject.CreatePrimitive(PrimitiveType.Cube);
             platformL.AddComponent<GorillaSurfaceOverride>();
@@ -108,17 +102,17 @@ namespace CustomPlatformManager
             platformTransformL = platformL.transform;
             platformTransformR = platformR.transform;
 
-            foreach (Transform child in handle.Find("Main/Buttons/Colors/Red"))
+            foreach (Transform child in CPMT.Find("Main/Buttons/Colors/Red"))
             {
                 child.gameObject.AddComponent<ButtonManager>();
             }
 
-            foreach (Transform child in handle.Find("Main/Buttons/Colors/Green"))
+            foreach (Transform child in CPMT.Find("Main/Buttons/Colors/Green"))
             {
                 child.gameObject.AddComponent<ButtonManager>();
             }
 
-            foreach (Transform child in handle.Find("Main/Buttons/Colors/Blue"))
+            foreach (Transform child in CPMT.Find("Main/Buttons/Colors/Blue"))
             {
                 child.gameObject.AddComponent<ButtonManager>();
             }
@@ -128,11 +122,7 @@ namespace CustomPlatformManager
         {
             isEnabled = false;
             manager.SetActive(false);
-            foreach (GameObject child in new GameObject[] { platformL, platformR })
-            {
-                child.transform.position = Vector3.zero;
-                Destroy(child);
-            }
+            platformL.SetActive(false); platformR.SetActive(false);
         }
 
         void OnEnable()
@@ -189,20 +179,14 @@ namespace CustomPlatformManager
         [ModdedGamemodeJoin]
         public void OnJoin(string gamemode)
         {
-            if (base.enabled)
-            {
-                setup();
-            }
+            setup();
             inRoom = true;
         }
 
         [ModdedGamemodeLeave]
         public void OnLeave(string gamemode)
         {
-            if (base.enabled)
-            {
-                cleanup();
-            }
+            cleanup();
             inRoom = false;
         }
 
