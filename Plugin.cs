@@ -6,50 +6,35 @@ using BepInEx.Configuration;
 using CustomPlatformManager.buttons;
 using TMPro;
 using UnityEngine;
-using Utilla;
+using Newtilla;
 
 namespace CustomPlatformManager
 {
-    [ModdedGamemode]
-    [BepInDependency("org.legoandmars.gorillatag.utilla", "1.5.0")]
-    [BepInPlugin("zaynethedev.CustomPlatformManager", "CustomPlatformManager", "1.0.1")]
+    [BepInDependency("Lofiat.Newtilla", "1.0.1")]
+    [BepInPlugin("zaynethedev.CustomPlatformManager", "CustomPlatformManager", "1.0.2")]
     public class Plugin : BaseUnityPlugin
     {
-        public bool isFlip = false;
-        public bool isEnabled;
-        public bool inRoom;
-        public bool platSetL;
-        public bool platSetR;
-        public string platformType = "Sticky";
-        public string platformShape = "Square";
-        public string platformSize = "2";
-        public string platformColorR = "8";
-        public string platformColorG = "8";
-        public string platformColorB = "8";
-        public GameObject manager;
-        public GameObject platformL;
-        public GameObject platformR;
-        public GameObject setupusemanager;
-        public Transform platformTransformL;
-        public Transform platformTransformR;
+        public bool isFlip = false, isEnabled, inRoom, platSetL, platSetR, isPlatsEnabled;
+        public string platformColorR = "8", platformColorG = "8", platformColorB = "8";
+        public GameObject manager, platformL, platformR, setupusemanager;
+        public Transform platformTransformL, platformTransformR;
+        public TextMeshPro redText, greenText, blueText, infoText;
         public Vector3 platformOffset = new Vector3(0f, 0f, 0f);
-        public TextMeshPro redText;
-        public TextMeshPro greenText;
-        public TextMeshPro blueText;
-        public TextMeshPro infoText;
-        public static Plugin Instance;
         public Color platformColor = new Color(1f, 1f, 1f) * 255 / 8f;
         public Material platformMaterial = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        public static Plugin Instance;
 
         void Start()
         {
             Instance = this;
             var bundle = LoadAssetBundle("CustomPlatformManager.Resources.resources");
             manager = bundle.LoadAsset<GameObject>("CustomPlatformManager");
-            Utilla.Events.GameInitialized += OnGameInitialized;
+            GorillaTagger.OnPlayerSpawned(OnGameInitialized);
+            Newtilla.Newtilla.OnJoinModded += OnModdedJoined;
+            Newtilla.Newtilla.OnLeaveModded += OnModdedLeft;
         }
 
-        void OnGameInitialized(object sender, EventArgs e)
+        void OnGameInitialized()
         {
             if (base.enabled && manager != null)
             {
@@ -61,6 +46,7 @@ namespace CustomPlatformManager
 
         public void setup()
         {
+            isPlatsEnabled = true;
             if (manager == null)
                 return;
 
@@ -80,10 +66,10 @@ namespace CustomPlatformManager
             platformColorG = greenText.text.ToString();
             platformColorB = blueText.text.ToString();
 
-            manager.transform.localPosition = new Vector3(-69.25f, 12f, -83.87f);
+            manager.transform.localPosition = new Vector3(-69.2f, 12f, -83.8f);
             manager.transform.localScale = new Vector3(0.16f, 0.16f, 0.16f);
             manager.transform.rotation = Quaternion.Euler(0f, 335f, 0f);
-            infoText.text = "v1.0.1";
+            infoText.text = "v1.0.2";
 
             platformL = GameObject.CreatePrimitive(PrimitiveType.Cube);
             platformL.AddComponent<GorillaSurfaceOverride>();
@@ -101,6 +87,11 @@ namespace CustomPlatformManager
 
             platformTransformL = platformL.transform;
             platformTransformR = platformR.transform;
+
+            foreach (Transform child in CPMT.Find("Main/Buttons/Other"))
+            {
+                child.gameObject.AddComponent<ButtonManager>();
+            }
 
             foreach (Transform child in CPMT.Find("Main/Buttons/Colors/Red"))
             {
@@ -122,6 +113,7 @@ namespace CustomPlatformManager
         {
             isEnabled = false;
             manager.SetActive(false);
+            platformL.transform.position = Vector3.zero; platformR.transform.position = Vector3.zero;
             platformL.SetActive(false); platformR.SetActive(false);
         }
 
@@ -141,50 +133,51 @@ namespace CustomPlatformManager
         {
             if (base.enabled && inRoom)
             {
-                if (ControllerInputPoller.instance.rightControllerGripFloat >= 0.5)
+                if (isPlatsEnabled)
                 {
-                    if (!platSetR)
+                    if (ControllerInputPoller.instance.rightControllerGripFloat >= 0.5)
                     {
-                        platSetR = true;
-                        platformTransformR.position = GorillaLocomotion.Player.Instance.rightControllerTransform.position + new Vector3(0, -0.1f, 0);
-                        platformTransformR.rotation = Quaternion.Euler(0, -90, 0);
-                        platformTransformR.Translate(platformOffset);
+                        if (!platSetR)
+                        {
+                            platSetR = true;
+                            platformTransformR.position = GorillaLocomotion.Player.Instance.rightControllerTransform.position + new Vector3(0, -0.1f, 0);
+                            platformTransformR.rotation = Quaternion.Euler(0, -90, 0);
+                            platformTransformR.Translate(platformOffset);
+                        }
                     }
-                }
-                else
-                {
-                    platSetR = false;
-                    platformTransformR.position = Vector3.zero;
-                    platformTransformR.rotation = Quaternion.identity;
-                }
-                if (ControllerInputPoller.instance.leftControllerGripFloat >= 0.5)
-                {
-                    if (!platSetL)
+                    else
                     {
-                        platSetL = true;
-                        platformTransformL.position = GorillaLocomotion.Player.Instance.leftControllerTransform.position + new Vector3(0, -0.1f, 0);
-                        platformTransformL.rotation = Quaternion.Euler(0, -90, 0);
-                        platformTransformL.Translate(platformOffset);
+                        platSetR = false;
+                        platformTransformR.position = Vector3.zero;
+                        platformTransformR.rotation = Quaternion.identity;
                     }
-                }
-                else
-                {
-                    platSetL = false;
-                    platformTransformL.position = Vector3.zero;
-                    platformTransformL.rotation = Quaternion.identity;
+                    if (ControllerInputPoller.instance.leftControllerGripFloat >= 0.5)
+                    {
+                        if (!platSetL)
+                        {
+                            platSetL = true;
+                            platformTransformL.position = GorillaLocomotion.Player.Instance.leftControllerTransform.position + new Vector3(0, -0.1f, 0);
+                            platformTransformL.rotation = Quaternion.Euler(0, -90, 0);
+                            platformTransformL.Translate(platformOffset);
+                        }
+                    }
+                    else
+                    {
+                        platSetL = false;
+                        platformTransformL.position = Vector3.zero;
+                        platformTransformL.rotation = Quaternion.identity;
+                    }
                 }
             }
         }
 
-        [ModdedGamemodeJoin]
-        public void OnJoin(string gamemode)
+        void OnModdedJoined(string modeName)
         {
             setup();
             inRoom = true;
         }
 
-        [ModdedGamemodeLeave]
-        public void OnLeave(string gamemode)
+        void OnModdedLeft(string modeName)
         {
             cleanup();
             inRoom = false;

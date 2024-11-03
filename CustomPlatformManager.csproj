@@ -67,6 +67,9 @@
     <Reference Include="MonoMod.Utils">
       <HintPath>..\..\Steam Installation\steamapps\common\Gorilla Tag\BepInEx\core\MonoMod.Utils.dll</HintPath>
     </Reference>
+    <Reference Include="Newtilla">
+      <HintPath>..\..\Steam Installation\steamapps\common\Gorilla Tag\BepInEx\plugins\Newtilla.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\Steam Installation\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -402,9 +405,6 @@
     </Reference>
     <Reference Include="UnityEngine.XRModule">
       <HintPath>..\..\Steam Installation\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.XRModule.dll</HintPath>
-    </Reference>
-    <Reference Include="Utilla">
-      <HintPath>..\..\Steam Installation\steamapps\common\Gorilla Tag\BepInEx\plugins\Utilla\Utilla.dll</HintPath>
     </Reference>
   </ItemGroup>
 
