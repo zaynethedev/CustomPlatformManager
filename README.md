@@ -9,3 +9,5 @@
 - Gorilla Tag (🦍)
   
 ![image](https://github.com/user-attachments/assets/4ace503d-98d3-4397-9328-aa3dc7a6552d)
+
+This product is not affiliated with Gorilla Tag or Another Axiom LLC and is not endorsed or otherwise sponsored by Another Axiom LLC. Portions of the materials contained herein are property of Another Axiom LLC. ©2021 Another Axiom LLC.
