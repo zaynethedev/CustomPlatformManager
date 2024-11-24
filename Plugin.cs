@@ -7,22 +7,30 @@ using CustomPlatformManager.buttons;
 using TMPro;
 using UnityEngine;
 using Newtilla;
+using HarmonyLib;
 
 namespace CustomPlatformManager
 {
     [BepInDependency("Lofiat.Newtilla", "1.0.1")]
-    [BepInPlugin("zaynethedev.CustomPlatformManager", "CustomPlatformManager", "1.0.2")]
+    [BepInPlugin("zaynethedev.CustomPlatformManager", "CustomPlatformManager", "1.1.0")]
     public class Plugin : BaseUnityPlugin
     {
-        public bool isFlip = false, isEnabled, inRoom, platSetL, platSetR, isPlatsEnabled;
+        private static Harmony instance;
+        public static bool IsPatched { get; private set; }
+        public const string InstanceId = "zaynethedev.CustomPlatformManager";
+        public bool isFlip = false, inRoom, platSetL, platSetR, isPlatsEnabled;
         public string platformColorR = "8", platformColorG = "8", platformColorB = "8";
         public GameObject manager, platformL, platformR, setupusemanager;
         public Transform platformTransformL, platformTransformR;
         public TextMeshPro redText, greenText, blueText, infoText;
-        public Vector3 platformOffset = new Vector3(0f, 0f, 0f);
+        public Vector3 platformOffsetL = new Vector3(0f, -0.025f, 0f);
+        public Vector3 platformOffsetR = new Vector3(0f, -0.025f, 0f);
         public Color platformColor = new Color(1f, 1f, 1f) * 255 / 8f;
         public Material platformMaterial = new Material(Shader.Find("Universal Render Pipeline/Lit"));
         public static Plugin Instance;
+        public GameObject[] textPages;
+        public GameObject[] buttonPages;
+        private int currentPage = 0;
 
         void Start()
         {
@@ -69,7 +77,7 @@ namespace CustomPlatformManager
             manager.transform.localPosition = new Vector3(-69.2f, 12f, -83.8f);
             manager.transform.localScale = new Vector3(0.16f, 0.16f, 0.16f);
             manager.transform.rotation = Quaternion.Euler(0f, 335f, 0f);
-            infoText.text = "v1.0.2";
+            infoText.text = "v1.1.0";
 
             platformL = GameObject.CreatePrimitive(PrimitiveType.Cube);
             platformL.AddComponent<GorillaSurfaceOverride>();
@@ -87,6 +95,16 @@ namespace CustomPlatformManager
 
             platformTransformL = platformL.transform;
             platformTransformR = platformR.transform;
+
+            textPages = new GameObject[] {
+                CPMT.Find("Main/TextObjects/Sizes").gameObject,
+                CPMT.Find("Main/TextObjects/Colors").gameObject
+            };
+
+            buttonPages = new GameObject[] {
+                CPMT.Find("Main/Buttons/Sizes").gameObject,
+                CPMT.Find("Main/Buttons/Colors").gameObject
+            };
 
             foreach (Transform child in CPMT.Find("Main/Buttons/Other"))
             {
@@ -107,11 +125,20 @@ namespace CustomPlatformManager
             {
                 child.gameObject.AddComponent<ButtonManager>();
             }
+
+            foreach (Transform child in CPMT.Find("Main/Buttons/Sizes/L"))
+            {
+                child.gameObject.AddComponent<ButtonManager>();
+            }
+
+            foreach (Transform child in CPMT.Find("Main/Buttons/Sizes/R"))
+            {
+                child.gameObject.AddComponent<ButtonManager>();
+            }
         }
 
         public void cleanup()
         {
-            isEnabled = false;
             manager.SetActive(false);
             platformL.transform.position = Vector3.zero; platformR.transform.position = Vector3.zero;
             platformL.SetActive(false); platformR.SetActive(false);
@@ -120,13 +147,26 @@ namespace CustomPlatformManager
         void OnEnable()
         {
             setup();
-            HarmonyPatches.ApplyHarmonyPatches();
+            if (!IsPatched)
+            {
+                if (instance == null)
+                {
+                    instance = new Harmony(InstanceId);
+                }
+
+                instance.PatchAll(Assembly.GetExecutingAssembly());
+                IsPatched = true;
+            }
         }
 
         void OnDisable()
         {
             cleanup();
-            HarmonyPatches.RemoveHarmonyPatches();
+            if (instance != null && IsPatched)
+            {
+                instance.UnpatchSelf();
+                IsPatched = false;
+            }
         }
 
         void Update()
@@ -142,7 +182,7 @@ namespace CustomPlatformManager
                             platSetR = true;
                             platformTransformR.position = GorillaLocomotion.Player.Instance.rightControllerTransform.position + new Vector3(0, -0.1f, 0);
                             platformTransformR.rotation = Quaternion.Euler(0, -90, 0);
-                            platformTransformR.Translate(platformOffset);
+                            platformTransformR.Translate(platformOffsetR);
                         }
                     }
                     else
@@ -158,7 +198,7 @@ namespace CustomPlatformManager
                             platSetL = true;
                             platformTransformL.position = GorillaLocomotion.Player.Instance.leftControllerTransform.position + new Vector3(0, -0.1f, 0);
                             platformTransformL.rotation = Quaternion.Euler(0, -90, 0);
-                            platformTransformL.Translate(platformOffset);
+                            platformTransformL.Translate(platformOffsetL);
                         }
                     }
                     else
@@ -189,6 +229,30 @@ namespace CustomPlatformManager
             AssetBundle bundle = AssetBundle.LoadFromStream(stream);
             stream.Close();
             return bundle;
+        }
+
+        public void NextPage()
+        {
+            if (currentPage < textPages.Length - 1 && buttonPages != null && textPages != null)
+            {
+                textPages[currentPage].SetActive(false);
+                buttonPages[currentPage].SetActive(false);
+                currentPage++;
+                textPages[currentPage].SetActive(true);
+                buttonPages[currentPage].SetActive(true);
+            }
+        }
+
+        public void PreviousPage()
+        {
+            if (currentPage > 0 && buttonPages != null && textPages != null)
+            {
+                textPages[currentPage].SetActive(false);
+                buttonPages[currentPage].SetActive(false);
+                currentPage--;
+                textPages[currentPage].SetActive(true);
+                buttonPages[currentPage].SetActive(true);
+            }
         }
     }
 }
