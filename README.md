@@ -9,6 +9,7 @@
 
 # Features
 - Color changing
+- Size changing
 
 # Requirements
 - Utilla v1.6.14 or higher
