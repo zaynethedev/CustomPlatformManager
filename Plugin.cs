@@ -6,7 +6,7 @@ using BepInEx.Configuration;
 using CustomPlatformManager.buttons;
 using TMPro;
 using UnityEngine;
-using Newtilla;
+using Photon.Pun;
 using HarmonyLib;
 
 namespace CustomPlatformManager
@@ -38,8 +38,9 @@ namespace CustomPlatformManager
             var bundle = LoadAssetBundle("CustomPlatformManager.Resources.resources");
             manager = bundle.LoadAsset<GameObject>("CustomPlatformManager");
             GorillaTagger.OnPlayerSpawned(OnGameInitialized);
-            Newtilla.Newtilla.OnJoinModded += OnModdedJoined;
-            Newtilla.Newtilla.OnLeaveModded += OnModdedLeft;
+            if (!PhotonNetwork.InRoom) OnModdedJoined();
+            else if (!NetworkSystem.Instance.GameModeString.Contains("MODDED")) OnModdedLeft();
+            GorillaTagger.OnPlayerSpawned(OnGameInitialized);
         }
 
         void OnGameInitialized()
@@ -211,13 +212,13 @@ namespace CustomPlatformManager
             }
         }
 
-        void OnModdedJoined(string modeName)
+        void OnModdedJoined()
         {
             setup();
             inRoom = true;
         }
 
-        void OnModdedLeft(string modeName)
+        void OnModdedLeft()
         {
             cleanup();
             inRoom = false;
