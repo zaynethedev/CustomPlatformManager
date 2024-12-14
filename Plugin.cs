@@ -11,7 +11,6 @@ using HarmonyLib;
 
 namespace CustomPlatformManager
 {
-    [BepInDependency("Lofiat.Newtilla", "1.0.1")]
     [BepInPlugin("zaynethedev.CustomPlatformManager", "CustomPlatformManager", "1.1.0")]
     public class Plugin : BaseUnityPlugin
     {
@@ -37,9 +36,6 @@ namespace CustomPlatformManager
             Instance = this;
             var bundle = LoadAssetBundle("CustomPlatformManager.Resources.resources");
             manager = bundle.LoadAsset<GameObject>("CustomPlatformManager");
-            GorillaTagger.OnPlayerSpawned(OnGameInitialized);
-            if (!PhotonNetwork.InRoom) OnModdedJoined();
-            else if (!NetworkSystem.Instance.GameModeString.Contains("MODDED")) OnModdedLeft();
             GorillaTagger.OnPlayerSpawned(OnGameInitialized);
         }
 
@@ -172,8 +168,17 @@ namespace CustomPlatformManager
 
         void Update()
         {
-            if (base.enabled && inRoom)
+            if (NetworkSystem.Instance.InRoom && NetworkSystem.Instance.GameModeString.Contains("MODDED"))
             {
+                if (!inRoom)
+                {
+                    inRoom = true;
+                     setup();
+                }
+                if (!manager.activeSelf)
+                {
+                    manager.SetActive(true);
+                }
                 if (isPlatsEnabled)
                 {
                     if (ControllerInputPoller.instance.rightControllerGripFloat >= 0.5)
@@ -210,18 +215,18 @@ namespace CustomPlatformManager
                     }
                 }
             }
-        }
-
-        void OnModdedJoined()
-        {
-            setup();
-            inRoom = true;
-        }
-
-        void OnModdedLeft()
-        {
-            cleanup();
-            inRoom = false;
+            else
+            {
+                if (inRoom)
+                {
+                    inRoom = false;
+                    cleanup();
+                }
+                if (manager.activeSelf)
+                {
+                    manager.SetActive(false);
+                }
+            }
         }
 
         public AssetBundle LoadAssetBundle(string path)
