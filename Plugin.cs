@@ -11,7 +11,7 @@ using HarmonyLib;
 
 namespace CustomPlatformManager
 {
-    [BepInPlugin("zaynethedev.CustomPlatformManager", "CustomPlatformManager", "1.1.0")]
+    [BepInPlugin("zaynethedev.CustomPlatformManager", "CustomPlatformManager", "1.1.2")]
     public class Plugin : BaseUnityPlugin
     {
         private static Harmony instance;
