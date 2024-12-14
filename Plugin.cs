@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Reflection;
 using BepInEx;
@@ -74,7 +74,7 @@ namespace CustomPlatformManager
             manager.transform.localPosition = new Vector3(-69.2f, 12f, -83.8f);
             manager.transform.localScale = new Vector3(0.16f, 0.16f, 0.16f);
             manager.transform.rotation = Quaternion.Euler(0f, 335f, 0f);
-            infoText.text = "v1.1.0";
+            infoText.text = "v1.1.2";
 
             platformL = GameObject.CreatePrimitive(PrimitiveType.Cube);
             platformL.AddComponent<GorillaSurfaceOverride>();
@@ -173,7 +173,7 @@ namespace CustomPlatformManager
                 if (!inRoom)
                 {
                     inRoom = true;
-                     setup();
+                    setup();
                 }
                 if (!manager.activeSelf)
                 {
